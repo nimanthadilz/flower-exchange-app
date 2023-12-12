@@ -1,0 +1,7 @@
+order_id,client_order_id,instrument_id,side,status,quantity,price
+ord1,aa13,Rose,1,NEW,100,55.00
+ord2,aa14,Rose,1,NEW,100,65.00
+ord3,aa15,Rose,2,PFILL,100,65.00
+ord2,aa14,Rose,1,FILL,100,65.00
+ord3,aa15,Rose,2,PFILL,100,55.00
+ord1,aa13,Rose,1,FILL,100,55.00
