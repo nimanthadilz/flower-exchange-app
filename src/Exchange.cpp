@@ -1,5 +1,6 @@
 #include <atomic>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <thread>
 
@@ -20,7 +21,7 @@ void Exchange::receiveOrder(std::vector<std::string> order)
     switch (newOrder.getInstrument())
     {
     case Instrument::ROSE:
-        roseOrdersQueue.push(newOrder);
+        m_roseOrdersQueue.push(newOrder);
         break;
     default:
         break;
@@ -63,13 +64,14 @@ Order Exchange::createOrder(std::vector<std::string> order)
         side = Side::SELL;
     }
 
-    double price = std::stod(order[3]);
-    int quantity = std::stoi(order[4]);
+    int quantity = std::stoi(order[3]);
+    double price = std::stod(order[4]);
 
     return Order{clientOrderId, instrument, side, price, quantity};
 }
 
-void processOrders(BlockingQueue<Order> &ordersQueue, BlockingQueue<ExecutionRecord> &executionRecordQueue)
+void processOrders(BlockingQueue<Order> &ordersQueue, BlockingQueue<ExecutionRecord> &executionRecordQueue,
+                   OrderBook &orderBook)
 {
     while (true)
     {
@@ -79,11 +81,12 @@ void processOrders(BlockingQueue<Order> &ordersQueue, BlockingQueue<ExecutionRec
             Order order = orderOpt.value();
             std::cout << "Processing order " << order.getClientOrderId() << '\n';
 
-            // TODO: processing logic
+            std::vector<ExecutionRecord> executionRecordsList = orderBook.processOrder(order);
 
-            ExecutionRecord executionRecord{"1", order.getClientOrderId(), order.getInstrument(), order.getSide(),
-                                            Status::NEW, order.getQuantity(), order.getPrice()};
-            executionRecordQueue.push(executionRecord);
+            for (auto executionRecord : executionRecordsList)
+            {
+                executionRecordQueue.push(executionRecord);
+            }
         }
         else
             return;
@@ -104,7 +107,9 @@ void writeExecutionRecords(BlockingQueue<ExecutionRecord> &executionRecordQueue,
                  << getInstrument(executionRecord.getInstrument()) << ','
                  << getSide(executionRecord.getSide()) << ','
                  << getStatus(executionRecord.getStatus()) << ','
-                 << executionRecord.getQuantity() << ',' << executionRecord.getPrice() << '\n';
+                 << executionRecord.getQuantity() << ','
+                 << std::fixed << std::setprecision(2)
+                 << executionRecord.getPrice() << '\n';
             std::cout << "Wrote execution record " << executionRecord.getClientOrderId() << '\n';
         }
         else

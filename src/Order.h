@@ -33,6 +33,12 @@ public:
     double getPrice() { return m_price; };
     int getQuantity() { return m_quantity; };
 
+    void setClientOrderId(std::string clientOrderId) { m_clientOrderId = clientOrderId; };
+    void setInstrument(Instrument instrument) { m_instrument = instrument; };
+    void setSide(Side side) { m_side = side; };
+    void setPrice(double price) { m_price = price; };
+    void setQuantity(int quantity) { m_quantity = quantity; };
+
     friend std::ostream &operator<<(std::ostream &os, const Order &order);
 };
 

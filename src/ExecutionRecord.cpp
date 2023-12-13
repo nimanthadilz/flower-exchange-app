@@ -4,8 +4,8 @@
 
 ExecutionRecord::ExecutionRecord(std::string orderId, std::string clientOrderId, Instrument instrument,
                                  Side side, Status status, int quantity, double price, std::string reason)
-    : orderId{orderId}, clientOrderId{clientOrderId}, instrument{instrument}, side{side}, status{status},
-      quantity{quantity}, price{price}, reason{reason} {}
+    : m_orderId{orderId}, m_clientOrderId{clientOrderId}, m_instrument{instrument}, m_side{side}, m_status{status},
+      m_quantity{quantity}, m_price{price}, m_reason{reason} {}
 
 std::string_view getStatus(Status status)
 {

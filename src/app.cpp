@@ -12,12 +12,18 @@
 
 int main(int argc, char const *argv[])
 {
-    CSVReader csvReader{"../sample_files/orders_5.csv"};
+    if (argc != 3)
+    {
+        std::cout << "Usage: " << argv[0] << " <input_file> <output_file>" << '\n';
+        return 1;
+    }
+
+    CSVReader csvReader{argv[1]};
     Exchange flowerExchange;
     std::atomic<bool> isOrderProducerDone{false};
     std::atomic<bool> isOrderProcessingDone{false};
 
-    std::ofstream executionRecordsFile{"../execution_records_5.csv"};
+    std::ofstream executionRecordsFile{argv[2]};
 
     if (!executionRecordsFile)
     {
@@ -26,7 +32,8 @@ int main(int argc, char const *argv[])
     }
 
     std::thread processThread(processOrders, std::ref(flowerExchange.getRoseOrdersQueue()),
-                              std::ref(flowerExchange.getExecutionRecordQueue()));
+                              std::ref(flowerExchange.getExecutionRecordQueue()),
+                              std::ref(flowerExchange.getRoseOrderBook()));
 
     std::thread writeExecutionRecordsThread(writeExecutionRecords, std::ref(flowerExchange.getExecutionRecordQueue()),
                                             std::ref(executionRecordsFile));
