@@ -20,8 +20,6 @@ int main(int argc, char const *argv[])
 
     CSVReader csvReader{argv[1]};
     Exchange flowerExchange;
-    std::atomic<bool> isOrderProducerDone{false};
-    std::atomic<bool> isOrderProcessingDone{false};
 
     std::ofstream executionRecordsFile{argv[2]};
 
