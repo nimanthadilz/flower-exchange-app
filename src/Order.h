@@ -19,6 +19,8 @@ enum class Side
 class Order
 {
 private:
+    static int m_current_id;
+    int m_orderId{};
     std::string m_clientOrderId{};
     Instrument m_instrument{};
     Side m_side{};
@@ -28,6 +30,7 @@ private:
 public:
     Order(std::string clientOrderId, Instrument instrument, Side side, double price, int quantity);
     std::string getClientOrderId() { return m_clientOrderId; };
+    int getOrderId() { return m_orderId; };
     Instrument getInstrument() { return m_instrument; };
     Side getSide() { return m_side; };
     double getPrice() { return m_price; };
@@ -39,6 +42,7 @@ public:
     void setPrice(double price) { m_price = price; };
     void setQuantity(int quantity) { m_quantity = quantity; };
 
+    static int getNextOrderId() { return m_current_id + 1; };
     friend std::ostream &operator<<(std::ostream &os, const Order &order);
 };
 

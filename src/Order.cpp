@@ -3,9 +3,12 @@
 
 #include "Order.h"
 
+int Order::m_current_id{0};
+
 Order::Order(std::string clientOrderId, Instrument instrument, Side side, double price, int quantity)
     : m_clientOrderId{clientOrderId}, m_instrument{instrument}, m_side{side}, m_price{price}, m_quantity{quantity}
 {
+    m_orderId = getNextOrderId();
 }
 
 std::ostream &operator<<(std::ostream &os, const Order &order)

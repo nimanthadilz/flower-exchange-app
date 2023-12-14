@@ -2,6 +2,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <atomic>
 
 #include "Order.h"
 
@@ -16,7 +17,7 @@ enum class Status
 class ExecutionRecord
 {
 private:
-    std::string m_orderId{};
+    int m_orderId{};
     std::string m_clientOrderId{};
     Instrument m_instrument{};
     Side m_side{};
@@ -30,12 +31,12 @@ private:
     void setTransactionTime();
 
 public:
-    ExecutionRecord(std::string orderId, std::string clientOrderId, Instrument instrument,
+    ExecutionRecord(int order_id, std::string clientOrderId, Instrument instrument,
                     Side side, Status status, int quantity, double price, std::string reason = "");
 
-    ExecutionRecord(std::unordered_map<std::string, std::string> invalidValues, std::string reason);
+    ExecutionRecord(int order_id, std::unordered_map<std::string, std::string> invalidValues, std::string reason);
 
-    std::string getOrderId() const { return m_orderId; }
+    int getOrderId() const { return m_orderId; }
     std::string getClientOrderId() const { return m_clientOrderId; }
     Instrument getInstrument() const { return m_instrument; }
     Side getSide() const { return m_side; }

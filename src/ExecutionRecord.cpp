@@ -1,3 +1,4 @@
+#include <atomic>
 #include <chrono>
 #include <ctime>
 #include <iomanip>
@@ -5,6 +6,7 @@
 
 #include "ExecutionRecord.h"
 #include "Order.h"
+
 
 void ExecutionRecord::setTransactionTime()
 {
@@ -27,7 +29,7 @@ void ExecutionRecord::setTransactionTime()
   m_transactionTime = oss.str();
 }
 
-ExecutionRecord::ExecutionRecord(std::string orderId, std::string clientOrderId, Instrument instrument,
+ExecutionRecord::ExecutionRecord(int orderId, std::string clientOrderId, Instrument instrument,
                                  Side side, Status status, int quantity, double price, std::string reason)
     : m_orderId{orderId}, m_clientOrderId{clientOrderId}, m_instrument{instrument}, m_side{side}, m_status{status},
       m_quantity{quantity}, m_price{price}, m_reason{reason}
@@ -35,7 +37,7 @@ ExecutionRecord::ExecutionRecord(std::string orderId, std::string clientOrderId,
   setTransactionTime();
 }
 
-ExecutionRecord::ExecutionRecord(std::unordered_map<std::string, std::string> invalidValues, std::string reason)
+ExecutionRecord::ExecutionRecord(int order_id, std::unordered_map<std::string, std::string> invalidValues, std::string reason)
     : m_invalidValues{invalidValues}, m_reason{reason}, m_status{Status::REJECTED}
 {
   setTransactionTime();

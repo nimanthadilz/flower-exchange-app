@@ -30,21 +30,21 @@ void Exchange::receiveOrder(std::vector<std::string> order)
     if (order[0].empty())
     {
         std::cout << "Invalid order: client order id is empty\n";
-        m_executionRecordQueue.push(ExecutionRecord(orderMap, "Invalid client order id"));
+        m_executionRecordQueue.push(ExecutionRecord(Order::getNextOrderId(), orderMap, "Invalid client order id"));
         return;
     }
 
     if (!isInstrumentValid(order[1]))
     {
         std::cout << "Invalid order: client order id: '" << order[0] << "' invalid instrument: " << order[1] << '\n';
-        m_executionRecordQueue.push(ExecutionRecord(orderMap, "Invalid instrument"));
+        m_executionRecordQueue.push(ExecutionRecord(Order::getNextOrderId(), orderMap, "Invalid instrument"));
         return;
     }
 
     if (order[2] != "1" && order[2] != "2")
     {
         std::cout << "Invalid order: order id: '" << order[0] << "' invalid side: " << order[2] << '\n';
-        m_executionRecordQueue.push(ExecutionRecord(orderMap, "Invalid side"));
+        m_executionRecordQueue.push(ExecutionRecord(Order::getNextOrderId(), orderMap, "Invalid side"));
         return;
     }
 
@@ -54,20 +54,20 @@ void Exchange::receiveOrder(std::vector<std::string> order)
         if (quantity < 10 || quantity > 1000 || quantity % 10 != 0)
         {
             std::cout << "Invalid order: order id: '" << order[0] << "' invalid quantity: " << order[3] << '\n';
-            m_executionRecordQueue.push(ExecutionRecord(orderMap, "Invalid quantity"));
+            m_executionRecordQueue.push(ExecutionRecord(Order::getNextOrderId(), orderMap, "Invalid quantity"));
             return;
         }
     }
     catch (std::invalid_argument &e)
     {
         std::cout << "Invalid order: order id: '" << order[0] << "' invalid quantity: " << order[3] << '\n';
-        m_executionRecordQueue.push(ExecutionRecord(orderMap, "Invalid quantity"));
+        m_executionRecordQueue.push(ExecutionRecord(Order::getNextOrderId(), orderMap, "Invalid quantity"));
         return;
     }
     catch (std::out_of_range &e)
     {
         std::cout << "Invalid order: order id: '" << order[0] << "' invalid quantity: " << order[3] << '\n';
-        m_executionRecordQueue.push(ExecutionRecord(orderMap, "Invalid quantity"));
+        m_executionRecordQueue.push(ExecutionRecord(Order::getNextOrderId(), orderMap, "Invalid quantity"));
         return;
     }
 
@@ -77,20 +77,20 @@ void Exchange::receiveOrder(std::vector<std::string> order)
         if (price < 0)
         {
             std::cout << "Invalid order: order id: '" << order[0] << "' invalid price: " << order[4] << '\n';
-            m_executionRecordQueue.push(ExecutionRecord(orderMap, "Invalid price"));
+            m_executionRecordQueue.push(ExecutionRecord(Order::getNextOrderId(), orderMap, "Invalid price"));
             return;
         }
     }
     catch (std::invalid_argument &e)
     {
         std::cout << "Invalid order: order id: '" << order[0] << "' invalid price: " << order[4] << '\n';
-        m_executionRecordQueue.push(ExecutionRecord(orderMap, "Invalid price"));
+        m_executionRecordQueue.push(ExecutionRecord(Order::getNextOrderId(), orderMap, "Invalid price"));
         return;
     }
     catch (std::out_of_range &e)
     {
         std::cout << "Invalid order: order id: '" << order[0] << "' invalid price: " << order[4] << '\n';
-        m_executionRecordQueue.push(ExecutionRecord(orderMap, "Invalid price"));
+        m_executionRecordQueue.push(ExecutionRecord(Order::getNextOrderId(), orderMap, "Invalid price"));
         return;
     }
 
@@ -194,7 +194,7 @@ void writeExecutionRecords(BlockingQueue<ExecutionRecord> &executionRecordQueue,
             if (executionRecord.getStatus() == Status::REJECTED)
             {
                 std::unordered_map<std::string, std::string> invalidValues = executionRecord.getInvalidValues();
-                file << "XXX,"
+                file << "ord" << executionRecord.getOrderId() << ','
                      << invalidValues["clientOrderId"] << ','
                      << invalidValues["instrument"] << ','
                      << invalidValues["side"] << ','
@@ -206,7 +206,7 @@ void writeExecutionRecords(BlockingQueue<ExecutionRecord> &executionRecordQueue,
             }
             else
             {
-                file << "XXX,"
+                file << "ord" << executionRecord.getOrderId() << ','
                      << executionRecord.getClientOrderId() << ','
                      << getInstrument(executionRecord.getInstrument()) << ','
                      << getSide(executionRecord.getSide()) << ','

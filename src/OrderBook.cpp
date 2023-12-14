@@ -39,9 +39,9 @@ std::vector<ExecutionRecord> OrderBook::processOrder(Order order)
         if (m_sellOrdersList.size() == 0 || price < m_sellOrdersList.front().getPrice())
         {
             addOrderToList(m_buyOrdersList, order, side);
-            executionRecordsList.push_back(ExecutionRecord{"XXX", order.getClientOrderId(), order.getInstrument(),
-                                                           order.getSide(), Status::NEW, order.getQuantity(),
-                                                           order.getPrice()});
+            executionRecordsList.push_back(ExecutionRecord{order.getOrderId(), order.getClientOrderId(),
+                                                           order.getInstrument(), order.getSide(), Status::NEW,
+                                                           order.getQuantity(), order.getPrice()});
             return executionRecordsList;
         }
 
@@ -56,19 +56,20 @@ std::vector<ExecutionRecord> OrderBook::processOrder(Order order)
             order.setQuantity(order.getQuantity() - quantity);
             sellOrder.setQuantity(sellOrder.getQuantity() - quantity);
 
-            ExecutionRecord executionRecord{"XXX", order.getClientOrderId(), order.getInstrument(), order.getSide(),
-                                            Status::FILL, quantity, sellOrder.getPrice()};
+            ExecutionRecord buyOrderExecutionRecord{order.getOrderId(), order.getClientOrderId(), order.getInstrument(),
+                                                    order.getSide(), Status::FILL, quantity, sellOrder.getPrice()};
             if (order.getQuantity() > 0)
             {
-                executionRecord.setStatus(Status::PFILL);
+                buyOrderExecutionRecord.setStatus(Status::PFILL);
             }
-            executionRecordsList.push_back(executionRecord);
+            executionRecordsList.push_back(buyOrderExecutionRecord);
 
-            executionRecord.setClientOrderId(sellOrder.getClientOrderId());
-            executionRecord.setSide(sellOrder.getSide());
-            executionRecord.setPrice(sellOrder.getPrice());
-            executionRecord.setStatus(sellOrder.getQuantity() > 0 ? Status::PFILL : Status::FILL);
-            executionRecordsList.push_back(executionRecord);
+            ExecutionRecord sellOrderExecutionRecord{sellOrder.getOrderId(), sellOrder.getClientOrderId(),
+                                                     sellOrder.getInstrument(), sellOrder.getSide(),
+                                                     sellOrder.getQuantity() > 0 ? Status::PFILL : Status::FILL,
+                                                     quantity, sellOrder.getPrice()};
+
+            executionRecordsList.push_back(sellOrderExecutionRecord);
 
             if (sellOrder.getQuantity() > 0)
             {
@@ -86,9 +87,9 @@ std::vector<ExecutionRecord> OrderBook::processOrder(Order order)
         if (m_buyOrdersList.size() == 0 || price > m_buyOrdersList.front().getPrice())
         {
             addOrderToList(m_sellOrdersList, order, side);
-            executionRecordsList.push_back(ExecutionRecord{"XXX", order.getClientOrderId(), order.getInstrument(),
-                                                           order.getSide(), Status::NEW, order.getQuantity(),
-                                                           order.getPrice()});
+            executionRecordsList.push_back(ExecutionRecord{order.getOrderId(), order.getClientOrderId(),
+                                                           order.getInstrument(), order.getSide(), Status::NEW,
+                                                           order.getQuantity(), order.getPrice()});
             return executionRecordsList;
         }
         // while there are buy orders and the price of the sell order is less than or equal to the price of the
@@ -102,19 +103,20 @@ std::vector<ExecutionRecord> OrderBook::processOrder(Order order)
             order.setQuantity(order.getQuantity() - quantity);
             buyOrder.setQuantity(buyOrder.getQuantity() - quantity);
 
-            ExecutionRecord executionRecord{"XXX", order.getClientOrderId(), order.getInstrument(), order.getSide(),
-                                            Status::FILL, quantity, buyOrder.getPrice()};
+            ExecutionRecord sellOrderExecutionRecord{order.getOrderId(), order.getClientOrderId(),
+                                                     order.getInstrument(), order.getSide(), Status::FILL,
+                                                     quantity, buyOrder.getPrice()};
             if (order.getQuantity() > 0)
             {
-                executionRecord.setStatus(Status::PFILL);
+                sellOrderExecutionRecord.setStatus(Status::PFILL);
             }
-            executionRecordsList.push_back(executionRecord);
+            executionRecordsList.push_back(sellOrderExecutionRecord);
 
-            executionRecord.setClientOrderId(buyOrder.getClientOrderId());
-            executionRecord.setSide(buyOrder.getSide());
-            executionRecord.setPrice(buyOrder.getPrice());
-            executionRecord.setStatus(buyOrder.getQuantity() > 0 ? Status::PFILL : Status::FILL);
-            executionRecordsList.push_back(executionRecord);
+            ExecutionRecord buyOrderExecutionRecord{buyOrder.getOrderId(), buyOrder.getClientOrderId(),
+                                                    buyOrder.getInstrument(), buyOrder.getSide(),
+                                                    buyOrder.getQuantity() > 0 ? Status::PFILL : Status::FILL,
+                                                    quantity, buyOrder.getPrice()};
+            executionRecordsList.push_back(buyOrderExecutionRecord);
 
             if (buyOrder.getQuantity() > 0)
             {
