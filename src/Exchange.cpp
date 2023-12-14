@@ -1,7 +1,10 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <memory>
 #include <thread>
+#include <utility>
+#include <vector>
 
 #include "Exchange.h"
 #include "ExecutionRecord.h"
@@ -26,21 +29,21 @@ void Exchange::receiveOrder(std::vector<std::string> order)
     if (order[0].empty())
     {
         std::cout << "Invalid order: client order id is empty\n";
-        m_executionRecordQueue.push(ExecutionRecord(Order::getNextOrderId(), orderMap, "Invalid client order id"));
+        m_executionRecordQueuePtr->push(ExecutionRecord(Order::getNextOrderId(), orderMap, "Invalid client order id"));
         return;
     }
 
     if (!isInstrumentValid(order[1]))
     {
         std::cout << "Invalid order: client order id: '" << order[0] << "' invalid instrument: " << order[1] << '\n';
-        m_executionRecordQueue.push(ExecutionRecord(Order::getNextOrderId(), orderMap, "Invalid instrument"));
+        m_executionRecordQueuePtr->push(ExecutionRecord(Order::getNextOrderId(), orderMap, "Invalid instrument"));
         return;
     }
 
     if (order[2] != "1" && order[2] != "2")
     {
         std::cout << "Invalid order: order id: '" << order[0] << "' invalid side: " << order[2] << '\n';
-        m_executionRecordQueue.push(ExecutionRecord(Order::getNextOrderId(), orderMap, "Invalid side"));
+        m_executionRecordQueuePtr->push(ExecutionRecord(Order::getNextOrderId(), orderMap, "Invalid side"));
         return;
     }
 
@@ -50,20 +53,20 @@ void Exchange::receiveOrder(std::vector<std::string> order)
         if (quantity < 10 || quantity > 1000 || quantity % 10 != 0)
         {
             std::cout << "Invalid order: order id: '" << order[0] << "' invalid quantity: " << order[3] << '\n';
-            m_executionRecordQueue.push(ExecutionRecord(Order::getNextOrderId(), orderMap, "Invalid quantity"));
+            m_executionRecordQueuePtr->push(ExecutionRecord(Order::getNextOrderId(), orderMap, "Invalid quantity"));
             return;
         }
     }
     catch (std::invalid_argument &e)
     {
         std::cout << "Invalid order: order id: '" << order[0] << "' invalid quantity: " << order[3] << '\n';
-        m_executionRecordQueue.push(ExecutionRecord(Order::getNextOrderId(), orderMap, "Invalid quantity"));
+        m_executionRecordQueuePtr->push(ExecutionRecord(Order::getNextOrderId(), orderMap, "Invalid quantity"));
         return;
     }
     catch (std::out_of_range &e)
     {
         std::cout << "Invalid order: order id: '" << order[0] << "' invalid quantity: " << order[3] << '\n';
-        m_executionRecordQueue.push(ExecutionRecord(Order::getNextOrderId(), orderMap, "Invalid quantity"));
+        m_executionRecordQueuePtr->push(ExecutionRecord(Order::getNextOrderId(), orderMap, "Invalid quantity"));
         return;
     }
 
@@ -73,75 +76,67 @@ void Exchange::receiveOrder(std::vector<std::string> order)
         if (price < 0)
         {
             std::cout << "Invalid order: order id: '" << order[0] << "' invalid price: " << order[4] << '\n';
-            m_executionRecordQueue.push(ExecutionRecord(Order::getNextOrderId(), orderMap, "Invalid price"));
+            m_executionRecordQueuePtr->push(ExecutionRecord(Order::getNextOrderId(), orderMap, "Invalid price"));
             return;
         }
     }
     catch (std::invalid_argument &e)
     {
         std::cout << "Invalid order: order id: '" << order[0] << "' invalid price: " << order[4] << '\n';
-        m_executionRecordQueue.push(ExecutionRecord(Order::getNextOrderId(), orderMap, "Invalid price"));
+        m_executionRecordQueuePtr->push(ExecutionRecord(Order::getNextOrderId(), orderMap, "Invalid price"));
         return;
     }
     catch (std::out_of_range &e)
     {
         std::cout << "Invalid order: order id: '" << order[0] << "' invalid price: " << order[4] << '\n';
-        m_executionRecordQueue.push(ExecutionRecord(Order::getNextOrderId(), orderMap, "Invalid price"));
+        m_executionRecordQueuePtr->push(ExecutionRecord(Order::getNextOrderId(), orderMap, "Invalid price"));
         return;
     }
 
     Order newOrder = createOrder(order);
 
-    switch (newOrder.getInstrument())
-    {
-    case Instrument::ROSE:
-        m_roseOrdersQueue.push(newOrder);
-        break;
-    default:
-        break;
-    }
+    queueMap[order[1]]->push(newOrder);
 }
 
-void Exchange::initThreads(std::ofstream &executionRecordsFile)
+void Exchange::init(std::ofstream &executionRecordsFile)
 {
-    threadsMap["roseOrdersProcessingThread"] = std::thread(&Exchange::processOrders, this, "Rose");
+    for (auto instrument : m_instruments)
+    {
+        // initialize queues
+        std::unique_ptr<BlockingQueue<Order>> ordersQueue = std::make_unique<BlockingQueue<Order>>();
+        queueMap[instrument] = std::move(ordersQueue);
+
+        // initialize order books
+        std::unique_ptr<OrderBook> orderBook = std::make_unique<OrderBook>();
+        orderBookMap[instrument] = std::move(orderBook);
+
+        // start threads
+        threadsMap[instrument] = std::thread(&Exchange::processOrders, this, instrument);
+    }
+    m_executionRecordQueuePtr = std::make_unique<BlockingQueue<ExecutionRecord>>();
     threadsMap["executionRecordsWriterThread"] = std::thread(&Exchange::writeExecutionRecords, this,
                                                              std::ref(executionRecordsFile));
 }
 
 void Exchange::setOrderProducerDone()
 {
-    m_roseOrdersQueue.setDone();
-    threadsMap["roseOrdersProcessingThread"].join();
-    m_executionRecordQueue.setDone();
+    for (auto instrument : m_instruments)
+    {
+        queueMap[instrument]->setDone();
+        threadsMap[instrument].join();
+    }
+    m_executionRecordQueuePtr->setDone();
     threadsMap["executionRecordsWriterThread"].join();
+}
+
+void Exchange::addInstrument(std::string instrument)
+{
+    m_instruments.push_back(instrument);
 }
 
 Order Exchange::createOrder(std::vector<std::string> order)
 {
-    std::string clientOrderId = order[0];
-
-    Instrument instrument;
-    if (order[1] == "Rose")
-    {
-        instrument = Instrument::ROSE;
-    }
-    else if (order[1] == "Lavender")
-    {
-        instrument = Instrument::LAVENDER;
-    }
-    else if (order[1] == "Lotus")
-    {
-        instrument = Instrument::LOTUS;
-    }
-    else if (order[1] == "Tulip")
-    {
-        instrument = Instrument::TULIP;
-    }
-    else
-    {
-        instrument = Instrument::ORCHID;
-    }
+    std::string clientOrderId{order[0]};
 
     Side side;
     if (order[2] == "1")
@@ -156,37 +151,33 @@ Order Exchange::createOrder(std::vector<std::string> order)
     int quantity = std::stoi(order[3]);
     double price = std::stod(order[4]);
 
-    return Order{clientOrderId, instrument, side, price, quantity};
+    return Order{clientOrderId, order[1], side, price, quantity};
 }
 
 bool Exchange::isInstrumentValid(std::string instrument)
 {
-    if (instrument == "Rose" || instrument == "Lavender" || instrument == "Lotus" || instrument == "Tulip" ||
-        instrument == "Orchid")
+    if (queueMap.find(instrument) != queueMap.end())
     {
         return true;
     }
     return false;
 }
 
-void Exchange::processOrders(std::string_view instrument)
+void Exchange::processOrders(std::string instrument)
 {
-    BlockingQueue<Order> &ordersQueue = getRoseOrdersQueue();
-    OrderBook &orderBook = getRoseOrderBook();
-
     while (true)
     {
-        std::optional<Order> orderOpt = ordersQueue.pop();
+        std::optional<Order> orderOpt = queueMap[instrument]->pop();
         if (orderOpt.has_value())
         {
             Order order = orderOpt.value();
             std::cout << "Processing order " << order.getClientOrderId() << '\n';
 
-            std::vector<ExecutionRecord> executionRecordsList = orderBook.processOrder(order);
+            std::vector<ExecutionRecord> executionRecordsList = orderBookMap[instrument]->processOrder(order);
 
             for (auto executionRecord : executionRecordsList)
             {
-                m_executionRecordQueue.push(executionRecord);
+                m_executionRecordQueuePtr->push(executionRecord);
             }
         }
         else
@@ -198,7 +189,7 @@ void Exchange::writeExecutionRecords(std::ofstream &file)
 {
     while (true)
     {
-        std::optional<ExecutionRecord> executionRecordOpt = m_executionRecordQueue.pop();
+        std::optional<ExecutionRecord> executionRecordOpt = m_executionRecordQueuePtr->pop();
 
         if (executionRecordOpt.has_value())
         {
@@ -221,7 +212,7 @@ void Exchange::writeExecutionRecords(std::ofstream &file)
             {
                 file << "ord" << executionRecord.getOrderId() << ','
                      << executionRecord.getClientOrderId() << ','
-                     << getInstrument(executionRecord.getInstrument()) << ','
+                     << executionRecord.getInstrument() << ','
                      << getSide(executionRecord.getSide()) << ','
                      << getStatus(executionRecord.getStatus()) << ','
                      << executionRecord.getQuantity() << ','

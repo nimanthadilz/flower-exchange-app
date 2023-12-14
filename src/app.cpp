@@ -37,8 +37,14 @@ int main(int argc, char const *argv[])
     // write header of the output file
     executionRecordsFile << "orderId,clientOrderId,instrument,side,status,quantity,price,reason,transactionTime\n";
 
+    // Initialize exchange
     Exchange flowerExchange;
-    flowerExchange.initThreads(executionRecordsFile);
+    flowerExchange.addInstrument("Rose");
+    flowerExchange.addInstrument("Lavender");
+    flowerExchange.addInstrument("Lotus");
+    flowerExchange.addInstrument("Tulip");
+    flowerExchange.addInstrument("Orchid");
+    flowerExchange.init(executionRecordsFile);
 
     // Read orders from file
     std::vector<std::string> order = csvReader.readOrder(ordersFile); // skip header

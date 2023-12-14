@@ -28,7 +28,7 @@ void ExecutionRecord::setTransactionTime()
   m_transactionTime = oss.str();
 }
 
-ExecutionRecord::ExecutionRecord(int orderId, std::string clientOrderId, Instrument instrument,
+ExecutionRecord::ExecutionRecord(int orderId, std::string clientOrderId, std::string instrument,
                                  Side side, Status status, int quantity, double price, std::string reason)
     : m_orderId{orderId}, m_clientOrderId{clientOrderId}, m_instrument{instrument}, m_side{side}, m_status{status},
       m_quantity{quantity}, m_price{price}, m_reason{reason}

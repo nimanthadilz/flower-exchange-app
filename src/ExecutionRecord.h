@@ -19,7 +19,7 @@ class ExecutionRecord
 private:
     int m_orderId{};
     std::string m_clientOrderId{};
-    Instrument m_instrument{};
+    std::string m_instrument{};
     Side m_side{};
     Status m_status{};
     int m_quantity{};
@@ -31,14 +31,14 @@ private:
     void setTransactionTime();
 
 public:
-    ExecutionRecord(int order_id, std::string clientOrderId, Instrument instrument,
+    ExecutionRecord(int order_id, std::string clientOrderId, std::string instrument,
                     Side side, Status status, int quantity, double price, std::string reason = "");
 
     ExecutionRecord(int order_id, std::unordered_map<std::string, std::string> invalidValues, std::string reason);
 
     int getOrderId() const { return m_orderId; }
     std::string getClientOrderId() const { return m_clientOrderId; }
-    Instrument getInstrument() const { return m_instrument; }
+    std::string getInstrument() const { return m_instrument; }
     Side getSide() const { return m_side; }
     Status getStatus() const { return m_status; }
     int getQuantity() const { return m_quantity; }
@@ -48,7 +48,7 @@ public:
     std::string getTransactionTime() const { return m_transactionTime; }
 
     void setClientOrderId(std::string clientOrderId) { m_clientOrderId = clientOrderId; }
-    void setInstrument(Instrument instrument) { m_instrument = instrument; }
+    void setInstrument(std::string instrument) { m_instrument = instrument; }
     void setSide(Side side) { m_side = side; }
     void setStatus(Status status) { m_status = status; }
     void setQuantity(int quantity) { m_quantity = quantity; }
