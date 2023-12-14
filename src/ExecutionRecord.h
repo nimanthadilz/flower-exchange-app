@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <unordered_map>
 
 #include "Order.h"
 
@@ -23,10 +24,16 @@ private:
     int m_quantity{};
     double m_price{};
     std::string m_reason{};
+    std::string m_transactionTime{};
+    std::unordered_map <std::string, std::string> m_invalidValues;
+
+    void setTransactionTime();
 
 public:
     ExecutionRecord(std::string orderId, std::string clientOrderId, Instrument instrument,
                     Side side, Status status, int quantity, double price, std::string reason = "");
+
+    ExecutionRecord(std::unordered_map<std::string, std::string> invalidValues, std::string reason);
 
     std::string getOrderId() const { return m_orderId; }
     std::string getClientOrderId() const { return m_clientOrderId; }
@@ -36,8 +43,9 @@ public:
     int getQuantity() const { return m_quantity; }
     double getPrice() const { return m_price; }
     std::string getReason() const { return m_reason; }
+    std::unordered_map<std::string, std::string> getInvalidValues() const { return m_invalidValues; }
+    std::string getTransactionTime() const { return m_transactionTime; }
 
-    // setters for data members
     void setClientOrderId(std::string clientOrderId) { m_clientOrderId = clientOrderId; }
     void setInstrument(Instrument instrument) { m_instrument = instrument; }
     void setSide(Side side) { m_side = side; }

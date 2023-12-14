@@ -18,6 +18,7 @@ private:
     OrderBook m_roseOrderBook;
 
     Order createOrder(std::vector<std::string> order);
+    bool isInstrumentValid(std::string instrument);
 
 public:
     Exchange();
