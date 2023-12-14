@@ -23,15 +23,15 @@ std::string_view getInstrument(Instrument instrument)
     switch (instrument)
     {
     case Instrument::ROSE:
-        return "ROSE";
+        return "Rose";
     case Instrument::LAVENDER:
-        return "LAVENDER";
+        return "Lavender";
     case Instrument::LOTUS:
-        return "LOTUS";
+        return "Lotus";
     case Instrument::TULIP:
-        return "TULIP";
+        return "Tulip";
     case Instrument::ORCHID:
-        return "ORCHID";
+        return "Orchid";
     default:
         return "UNKNOWN";
     }
@@ -42,9 +42,9 @@ std::string_view getSide(Side side)
     switch (side)
     {
     case Side::BUY:
-        return "BUY";
+        return "1";
     case Side::SELL:
-        return "SELL";
+        return "2";
     default:
         return "UNKNOWN";
     }
