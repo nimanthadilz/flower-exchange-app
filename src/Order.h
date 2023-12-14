@@ -42,7 +42,7 @@ public:
     void setPrice(double price) { m_price = price; };
     void setQuantity(int quantity) { m_quantity = quantity; };
 
-    static int getNextOrderId() { return m_current_id + 1; };
+    static int getNextOrderId() { return ++m_current_id; };
     friend std::ostream &operator<<(std::ostream &os, const Order &order);
 };
 
