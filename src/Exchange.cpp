@@ -201,7 +201,7 @@ void writeExecutionRecords(BlockingQueue<ExecutionRecord> &executionRecordQueue,
                      << getStatus(executionRecord.getStatus()) << ','
                      << invalidValues["quantity"] << ','
                      << invalidValues["price"] << ','
-                     << invalidValues["reason"] << ','
+                     << executionRecord.getReason() << ','
                      << executionRecord.getTransactionTime() << '\n';
             }
             else
@@ -214,6 +214,7 @@ void writeExecutionRecords(BlockingQueue<ExecutionRecord> &executionRecordQueue,
                      << executionRecord.getQuantity() << ','
                      << std::fixed << std::setprecision(2)
                      << executionRecord.getPrice() << ','
+                     << "" << ','
                      << executionRecord.getTransactionTime() << '\n';
             }
             std::cout << "Wrote execution record for order " << executionRecord.getClientOrderId() << '\n';
