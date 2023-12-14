@@ -1,0 +1,13 @@
+clientOrderId,instrument,side,quantity,price
+,,,
+,Rose,1,100,10.00
+aa13,,1,100,10.00
+aa13,Rose,,100,10.00
+aa13,Rose,2,,10.00
+aa13,Rose,2,10,
+aa13,Rice,2,10,55.00
+aa13,Rose,2,155,55.00
+aa14,Rose,2,14555,55.00
+aa13,Rose,2,1,55.00
+aa13,Rose,2,10,-1.00
+aa13,Rose,2,10,1.00
