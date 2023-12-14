@@ -31,6 +31,8 @@ int main(int argc, char const *argv[])
         return 1;
     }
 
+    executionRecordsFile << "orderId,clientOrderId,instrument,side,status,quantity,price,reason,transactionTime\n";
+
     std::thread processThread(processOrders, std::ref(flowerExchange.getRoseOrdersQueue()),
                               std::ref(flowerExchange.getExecutionRecordQueue()),
                               std::ref(flowerExchange.getRoseOrderBook()));
