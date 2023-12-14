@@ -7,10 +7,6 @@
 #include "ExecutionRecord.h"
 #include "Order.h"
 
-Exchange::Exchange()
-{
-}
-
 void Exchange::receiveOrder(std::vector<std::string> order)
 {
     // validations

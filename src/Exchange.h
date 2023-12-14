@@ -24,7 +24,6 @@ private:
     void writeExecutionRecords(std::ofstream &file);
 
 public:
-    Exchange();
     void receiveOrder(std::vector<std::string> order);
     BlockingQueue<Order> &getRoseOrdersQueue() { return m_roseOrdersQueue; };
     BlockingQueue<ExecutionRecord> &getExecutionRecordQueue() { return m_executionRecordQueue; };
