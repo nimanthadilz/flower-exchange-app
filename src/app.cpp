@@ -18,37 +18,41 @@ int main(int argc, char const *argv[])
         return 1;
     }
 
-    CSVReader csvReader{argv[1]};
-    Exchange flowerExchange;
+    // Open input file
+    std::ifstream ordersFile{argv[1]};
+    if (!ordersFile)
+    {
+        std::cerr << "Unable to open input file\n";
+        return 1;
+    }
+    CSVReader csvReader{};
 
+    // Open output file
     std::ofstream executionRecordsFile{argv[2]};
-
     if (!executionRecordsFile)
     {
         std::cerr << "Unable to open output file\n";
         return 1;
     }
-
+    // write header of the output file
     executionRecordsFile << "orderId,clientOrderId,instrument,side,status,quantity,price,reason,transactionTime\n";
 
-    std::thread processThread(processOrders, std::ref(flowerExchange.getRoseOrdersQueue()),
-                              std::ref(flowerExchange.getExecutionRecordQueue()),
-                              std::ref(flowerExchange.getRoseOrderBook()));
+    Exchange flowerExchange;
+    flowerExchange.initThreads(executionRecordsFile);
 
-    std::thread writeExecutionRecordsThread(writeExecutionRecords, std::ref(flowerExchange.getExecutionRecordQueue()),
-                                            std::ref(executionRecordsFile));
-
-    std::vector<std::string> order = csvReader.readOrder();
+    // Read orders from file
+    std::vector<std::string> order = csvReader.readOrder(ordersFile); // skip header
+    order = csvReader.readOrder(ordersFile);
     while (order.size())
     {
         flowerExchange.receiveOrder(order);
-        order = csvReader.readOrder();
+        order = csvReader.readOrder(ordersFile);
     }
-    flowerExchange.getRoseOrdersQueue().setDone();
-    processThread.join();
-    flowerExchange.getExecutionRecordQueue().setDone();
-    writeExecutionRecordsThread.join();
 
-    std::cout << "main thread finished" << '\n';
+    ordersFile.close();
+    flowerExchange.setOrderProducerDone(); // signal to threads that no more orders will be received
+    executionRecordsFile.close();
+
+    std::cout << "Finished processing." << '\n';
     return 0;
 }

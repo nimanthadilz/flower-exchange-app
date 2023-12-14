@@ -106,6 +106,21 @@ void Exchange::receiveOrder(std::vector<std::string> order)
     }
 }
 
+void Exchange::initThreads(std::ofstream &executionRecordsFile)
+{
+    threadsMap["roseOrdersProcessingThread"] = std::thread(&Exchange::processOrders, this, "Rose");
+    threadsMap["executionRecordsWriterThread"] = std::thread(&Exchange::writeExecutionRecords, this,
+                                                             std::ref(executionRecordsFile));
+}
+
+void Exchange::setOrderProducerDone()
+{
+    m_roseOrdersQueue.setDone();
+    threadsMap["roseOrdersProcessingThread"].join();
+    m_executionRecordQueue.setDone();
+    threadsMap["executionRecordsWriterThread"].join();
+}
+
 Order Exchange::createOrder(std::vector<std::string> order)
 {
     std::string clientOrderId = order[0];
@@ -158,9 +173,11 @@ bool Exchange::isInstrumentValid(std::string instrument)
     return false;
 }
 
-void processOrders(BlockingQueue<Order> &ordersQueue, BlockingQueue<ExecutionRecord> &executionRecordQueue,
-                   OrderBook &orderBook)
+void Exchange::processOrders(std::string_view instrument)
 {
+    BlockingQueue<Order> &ordersQueue = getRoseOrdersQueue();
+    OrderBook &orderBook = getRoseOrderBook();
+
     while (true)
     {
         std::optional<Order> orderOpt = ordersQueue.pop();
@@ -173,7 +190,7 @@ void processOrders(BlockingQueue<Order> &ordersQueue, BlockingQueue<ExecutionRec
 
             for (auto executionRecord : executionRecordsList)
             {
-                executionRecordQueue.push(executionRecord);
+                m_executionRecordQueue.push(executionRecord);
             }
         }
         else
@@ -181,11 +198,11 @@ void processOrders(BlockingQueue<Order> &ordersQueue, BlockingQueue<ExecutionRec
     }
 }
 
-void writeExecutionRecords(BlockingQueue<ExecutionRecord> &executionRecordQueue, std::ofstream &file)
+void Exchange::writeExecutionRecords(std::ofstream &file)
 {
     while (true)
     {
-        std::optional<ExecutionRecord> executionRecordOpt = executionRecordQueue.pop();
+        std::optional<ExecutionRecord> executionRecordOpt = m_executionRecordQueue.pop();
 
         if (executionRecordOpt.has_value())
         {
