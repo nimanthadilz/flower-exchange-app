@@ -1,8 +1,8 @@
-#include <vector>
-#include <string>
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <limits>
+#include <string>
+#include <vector>
 
 #include "CSVReader.h"
 
@@ -25,20 +25,19 @@ std::vector<std::string> CSVReader::readOrder()
     std::vector<std::string> lineArray{};
     if (ordersFile)
     {
-        std::string line;
-
+        std::string line{};
         std::getline(ordersFile, line);
-
-        int pos = 0;
-        std::string delimiter = ",";
-        while (pos < line.size())
+        if (line.empty() && ordersFile.eof())
         {
-            pos = line.find(",");
+            return lineArray;
+        }
+        std::string::size_type pos{};
+        while ((pos = line.find(',')) != std::string::npos)
+        {
             lineArray.push_back(line.substr(0, pos));
             line.erase(0, pos + 1);
         }
-
-        return lineArray;
+        lineArray.push_back(line);
     }
     return lineArray;
 }
