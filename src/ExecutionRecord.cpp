@@ -7,7 +7,6 @@
 #include "ExecutionRecord.h"
 #include "Order.h"
 
-
 void ExecutionRecord::setTransactionTime()
 {
   // Get the current time point
@@ -38,7 +37,7 @@ ExecutionRecord::ExecutionRecord(int orderId, std::string clientOrderId, Instrum
 }
 
 ExecutionRecord::ExecutionRecord(int order_id, std::unordered_map<std::string, std::string> invalidValues, std::string reason)
-    : m_invalidValues{invalidValues}, m_reason{reason}, m_status{Status::REJECTED}
+    : m_orderId{order_id}, m_invalidValues{invalidValues}, m_reason{reason}, m_status{Status::REJECTED}
 {
   setTransactionTime();
 }
