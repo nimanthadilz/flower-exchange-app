@@ -9,11 +9,7 @@
 
 class CSVReader
 {
-private:
-    std::string m_filename;
-    std::ifstream ordersFile;
 
 public:
-    CSVReader(std::string filename);
-    std::vector<std::string> readOrder();
+    std::vector<std::string> readOrder(std::ifstream &ordersFile);
 };

@@ -6,21 +6,7 @@
 
 #include "CSVReader.h"
 
-CSVReader::CSVReader(std::string filename)
-    : m_filename{filename}
-{
-    ordersFile.open(filename);
-
-    if (!ordersFile)
-    {
-        throw std::invalid_argument("Could not open " + filename);
-    }
-
-    // skip the header line of the CSV
-    ordersFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-}
-
-std::vector<std::string> CSVReader::readOrder()
+std::vector<std::string> CSVReader::readOrder(std::ifstream &ordersFile)
 {
     std::vector<std::string> lineArray{};
     if (ordersFile)
