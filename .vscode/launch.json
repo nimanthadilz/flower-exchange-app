@@ -8,20 +8,18 @@
             "name": "(gdb) Bash on Windows Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/main.exe",
-            "args": [],
+            "program": "${workspaceFolder}/src/app.exe",
+            "args": [
+                "sample_files/reject_orders_2.csv",
+                "test_output/r_2.csv"
+            ],
             "stopAtEntry": false,
-            "cwd": "${fileDirname}",
+            "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false,
-            "pipeTransport": {
-                "debuggerPath": "C:\\msys64\\mingw64\\bin\\gdb.exe",
-                "pipeProgram": "${env:windir}\\system32\\bash.exe",
-                "pipeArgs": [
-                    "-c"
-                ],
-                "pipeCwd": ""
-            },
+            "miDebuggerPath": "C:\\msys64\\mingw64\\bin\\gdb.exe",
+            "MIMode": "gdb",
+            "preLaunchTask": "C/C++: g++.exe build active file",
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for gdb",
