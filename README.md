@@ -4,7 +4,7 @@
 
 This is a simple app written in C++ to simulate a flower exchange. It uses the basic logic used in order books to match buy and sell orders.
 
-The program takes an input csv file with buy and sell orders and outputs a csv file with the matched orders.
+The program takes an input csv file with buy and sell orders and outputs a csv file with the execution records.
 
 Example input file:
 
