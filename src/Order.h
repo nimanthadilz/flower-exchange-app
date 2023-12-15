@@ -37,4 +37,4 @@ public:
     friend std::ostream &operator<<(std::ostream &os, const Order &order);
 };
 
-std::string_view getSide(Side side);
+std::string getSide(Side side);

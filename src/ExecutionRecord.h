@@ -56,4 +56,4 @@ public:
     void setReason(std::string reason) { m_reason = reason; }
 };
 
-std::string_view getStatus(Status status);
+std::string getStatus(Status status);

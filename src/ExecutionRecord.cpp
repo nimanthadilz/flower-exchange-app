@@ -42,7 +42,7 @@ ExecutionRecord::ExecutionRecord(int order_id, std::unordered_map<std::string, s
   setTransactionTime();
 }
 
-std::string_view getStatus(Status status)
+std::string getStatus(Status status)
 {
   switch (status)
   {

@@ -18,7 +18,7 @@ std::ostream &operator<<(std::ostream &os, const Order &order)
     return os;
 }
 
-std::string_view getSide(Side side)
+std::string getSide(Side side)
 {
     switch (side)
     {
