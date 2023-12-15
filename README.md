@@ -34,7 +34,7 @@ make
 build/app.exe <path_to_input_file> <path_to_output_file>
 ```
 
-## High Level Design of the App
+## High Level Architecture of the App
 
 ![High level design of the app](img/high_level_design.png)
 
