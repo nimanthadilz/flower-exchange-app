@@ -102,15 +102,15 @@ void Exchange::init(std::ofstream &executionRecordsFile)
 {
     for (auto instrument : m_instruments)
     {
-        // initialize queues
+        // initialize queue
         std::unique_ptr<BlockingQueue<Order>> ordersQueue = std::make_unique<BlockingQueue<Order>>();
         queueMap[instrument] = std::move(ordersQueue);
 
-        // initialize order books
+        // initialize order book
         std::unique_ptr<OrderBook> orderBook = std::make_unique<OrderBook>();
         orderBookMap[instrument] = std::move(orderBook);
 
-        // start threads
+        // start thread
         threadsMap[instrument] = std::thread(&Exchange::processOrders, this, instrument);
     }
     m_executionRecordQueuePtr = std::make_unique<BlockingQueue<ExecutionRecord>>();
