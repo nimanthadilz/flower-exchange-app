@@ -3,6 +3,7 @@
 #include <ctime>
 #include <iomanip>
 #include <iostream>
+#include <sstream>
 
 #include "ExecutionRecord.h"
 #include "Order.h"
