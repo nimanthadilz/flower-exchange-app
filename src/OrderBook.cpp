@@ -47,7 +47,7 @@ std::vector<ExecutionRecord> OrderBook::processOrder(Order order)
 
         // while there are sell orders and the price of the buy order is greater than or equal to the price of the
         // sell order, execute the buy order against the sell order
-        while (m_sellOrdersList.size() > 0 && price >= m_sellOrdersList.front().getPrice())
+        while (m_sellOrdersList.size() > 0 && price >= m_sellOrdersList.front().getPrice() && order.getQuantity() > 0)
         {
             Order sellOrder = m_sellOrdersList.front();
             m_sellOrdersList.pop_front();
@@ -94,7 +94,7 @@ std::vector<ExecutionRecord> OrderBook::processOrder(Order order)
         }
         // while there are buy orders and the price of the sell order is less than or equal to the price of the
         // buy order, execute the sell order against the buy order
-        while (m_buyOrdersList.size() > 0 && price <= m_buyOrdersList.front().getPrice())
+        while (m_buyOrdersList.size() > 0 && price <= m_buyOrdersList.front().getPrice() && order.getQuantity() > 0)
         {
             Order buyOrder = m_buyOrdersList.front();
             m_buyOrdersList.pop_front();
