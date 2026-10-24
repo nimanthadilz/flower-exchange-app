@@ -23,9 +23,9 @@ std::string getSide(Side side)
     switch (side)
     {
     case Side::BUY:
-        return "1";
+        return "BUY";
     case Side::SELL:
-        return "2";
+        return "SELL";
     default:
         return "UNKNOWN";
     }

@@ -115,8 +115,8 @@ void Exchange::writeExecutionRecords(std::ofstream &file)
             if (executionRecord.getStatus() == Status::REJECTED)
             {
                 std::unordered_map<std::string, std::string> invalidValues = executionRecord.getInvalidValues();
-                file << "ord" << executionRecord.getOrderId() << ','
-                     << invalidValues["clientOrderId"] << ','
+                file << invalidValues["clientOrderId"] << ','
+                     << "ord" << executionRecord.getOrderId() << ','
                      << invalidValues["instrument"] << ','
                      << invalidValues["side"] << ','
                      << getStatus(executionRecord.getStatus()) << ','
@@ -127,8 +127,8 @@ void Exchange::writeExecutionRecords(std::ofstream &file)
             }
             else
             {
-                file << "ord" << executionRecord.getOrderId() << ','
-                     << executionRecord.getClientOrderId() << ','
+                file << executionRecord.getClientOrderId() << ','
+                     << "ord" << executionRecord.getOrderId() << ','
                      << executionRecord.getInstrument() << ','
                      << getSide(executionRecord.getSide()) << ','
                      << getStatus(executionRecord.getStatus()) << ','
@@ -147,9 +147,20 @@ void Exchange::writeExecutionRecords(std::ofstream &file)
 
 bool Exchange::validateOrder(std::vector<std::string> order)
 {
-    if (order.size() < 5)
+    if (order.size() < 5 || (order.size() >= 5 && order[4].empty()))
     {
-        std::cout << "Invalid order: expected field count: 5, received field count: " << order.size() << '\n';
+        if (order.size() < 5)
+        {
+            std::cout << "Invalid order: expected field count: 5, received field count: " << order.size() << '\n';
+        }
+        std::unordered_map<std::string, std::string> orderMap = {
+            {"clientOrderId", ""},
+            {"instrument", ""},
+            {"side", ""},
+            {"quantity", ""},
+            {"price", ""}};
+        m_executionRecordQueuePtr->push(ExecutionRecord(
+            Order::getNextOrderId(), orderMap, "Missing one or more required fields."));
         return false;
     }
 

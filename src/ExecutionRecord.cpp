@@ -50,9 +50,9 @@ std::string getStatus(Status status)
   case Status::NEW:
     return "NEW";
   case Status::PFILL:
-    return "PFILL";
+    return "PARTIALLY_FILLED";
   case Status::FILL:
-    return "FILL";
+    return "FILLED";
   case Status::REJECTED:
     return "REJECTED";
   default:

@@ -35,7 +35,7 @@ int main(int argc, char const *argv[])
         return 1;
     }
     // write header of the output file
-    executionRecordsFile << "orderId,clientOrderId,instrument,side,status,quantity,price,reason,transactionTime\n";
+    executionRecordsFile << "clientOrderId,orderId,instrument,side,status,quantity,price,reason,timestamp\n";
 
     // Initialize exchange
     Exchange flowerExchange;
