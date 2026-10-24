@@ -197,7 +197,7 @@ bool Exchange::validateOrder(std::vector<std::string> order) {
 
   try {
     double price = std::stod(order[4]);
-    if (price < 0) {
+    if (price <= 0) {
       std::cout << "Invalid order: order id: '" << order[0]
                 << "' invalid price: " << order[4] << '\n';
       m_executionRecordQueuePtr->push(
