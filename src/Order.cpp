@@ -5,28 +5,28 @@
 
 int Order::m_current_id{0};
 
-Order::Order(std::string clientOrderId, std::string instrument, Side side, double price, int quantity)
-    : m_clientOrderId{clientOrderId}, m_instrument{instrument}, m_side{side}, m_price{price}, m_quantity{quantity}
-{
-    m_orderId = getNextOrderId();
+Order::Order(std::string clientOrderId, std::string instrument, Side side,
+             double price, int quantity)
+    : m_clientOrderId{clientOrderId}, m_instrument{instrument}, m_side{side},
+      m_price{price}, m_quantity{quantity} {
+  m_orderId = getNextOrderId();
 }
 
-std::ostream &operator<<(std::ostream &os, const Order &order)
-{
-    os << "clientOrderId: " << order.m_clientOrderId << ", instrument: " << order.m_instrument
-       << ", side: " << getSide(order.m_side) << ", price: " << order.m_price << ", quantity: " << order.m_quantity;
-    return os;
+std::ostream &operator<<(std::ostream &os, const Order &order) {
+  os << "clientOrderId: " << order.m_clientOrderId
+     << ", instrument: " << order.m_instrument
+     << ", side: " << getSide(order.m_side) << ", price: " << order.m_price
+     << ", quantity: " << order.m_quantity;
+  return os;
 }
 
-std::string getSide(Side side)
-{
-    switch (side)
-    {
-    case Side::BUY:
-        return "BUY";
-    case Side::SELL:
-        return "SELL";
-    default:
-        return "UNKNOWN";
-    }
+std::string getSide(Side side) {
+  switch (side) {
+  case Side::BUY:
+    return "BUY";
+  case Side::SELL:
+    return "SELL";
+  default:
+    return "UNKNOWN";
+  }
 }
