@@ -1,0 +1,13 @@
+clientOrderId,orderId,instrument,side,status,quantity,price,reason,timestamp
+,,,,REJECTED,,,Missing one or more required fields.,
+,,,,REJECTED,,,Client order ID is empty.,
+aa13,,,,REJECTED,,,Invalid instrument type.,
+aa13,,Rose,,REJECTED,,,Invalid side.,
+aa13,,Rose,SELL,REJECTED,,,Invalid quantity.,
+,,,,REJECTED,,,Missing one or more required fields.,
+aa13,,,,REJECTED,,,Invalid instrument type.,
+aa13,,Rose,SELL,REJECTED,155,,Quantity must be a multiple of 10.,
+aa14,,Rose,SELL,REJECTED,14555,,Quantity must be a multiple of 10.,
+aa13,,Rose,SELL,REJECTED,1,,Quantity must be a multiple of 10.,
+aa13,,Rose,SELL,REJECTED,10,-1.00,Price must be non-negative.,
+aa13,1,Rose,SELL,NEW,10,1.00,,2026-10-21 13:21:27

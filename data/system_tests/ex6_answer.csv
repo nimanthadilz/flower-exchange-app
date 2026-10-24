@@ -1,0 +1,7 @@
+clientOrderId,orderId,instrument,side,status,quantity,price,reason,timestamp
+aa1,1,,BUY,REJECTED,100,55.00,Invalid instrument type,
+aa2,2,Rose,,REJECTED,100,65.00,Invalid side,
+aa3,3,Rose,SELL,REJECTED,55,65.00,Quantity must be a multiple of 10,
+aa3,4,Rose,SELL,REJECTED,100,-55.00,Invalid price
+aa4,5,Rose,BUY,REJECTED,1100,55.00,Invalid quantity,
+aa5,6,Mango,BUY,REJECTED,100,55.00,Invalid instrument type,

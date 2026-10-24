@@ -65,7 +65,6 @@ When an order is received and matching order is there,
 	- If partially fulfilled, status will be "PFILL"
 - The fulfilled orders are removed from the order book and remaining quantities of the orders already in the book will be kept.
 - The incoming order will continue to match orders in the order book until there is no matching order found. The remaining quantity of the incoming order will be added to the order book.
-- Assume execution record is generated for the order in the order book before the other order.
 
 We call an order a *passive order* if it goes into the order book without executing. An *aggressive order* is an incoming order which executes. (Here *executing* means at the end we are generating a execution record with "FILL" or "PFILL")
 
