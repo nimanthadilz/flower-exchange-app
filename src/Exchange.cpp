@@ -1,7 +1,6 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
-#include <memory>
 #include <thread>
 #include <vector>
 
@@ -13,33 +12,31 @@ void Exchange::receiveOrder(std::vector<std::string> order) {
   if (!validateOrder(order))
     return;
   Order newOrder = createOrder(order);
-  m_queueMap[order[1]]->push(newOrder);
+  m_queueMap[order[1]].push(newOrder);
 }
 
 void Exchange::init(std::ofstream &executionRecordsFile) {
   for (auto instrument : m_instruments) {
     // initialize queue
-    m_queueMap[instrument] = std::make_unique<BlockingQueue<Order>>();
+    m_queueMap.try_emplace(instrument);
 
     // initialize order book
-    m_orderBookMap[instrument] = std::make_unique<OrderBook>();
+    m_orderBookMap.try_emplace(instrument);
 
     // start thread
     m_threadMap[instrument] =
         std::thread(&Exchange::processOrders, this, instrument);
   }
-  m_executionRecordQueuePtr =
-      std::make_unique<BlockingQueue<ExecutionRecord>>();
   m_threadMap["executionRecordsWriterThread"] = std::thread(
       &Exchange::writeExecutionRecords, this, std::ref(executionRecordsFile));
 }
 
 void Exchange::setOrderProducerDone() {
   for (auto instrument : m_instruments) {
-    m_queueMap[instrument]->setDone();
+    m_queueMap[instrument].setDone();
     m_threadMap[instrument].join();
   }
-  m_executionRecordQueuePtr->setDone();
+  m_executionRecordQueue.setDone();
   m_threadMap["executionRecordsWriterThread"].join();
 }
 
@@ -72,16 +69,16 @@ bool Exchange::isInstrumentValid(std::string instrument) {
 
 void Exchange::processOrders(std::string instrument) {
   while (true) {
-    std::optional<Order> orderOpt = m_queueMap[instrument]->pop();
+    std::optional<Order> orderOpt = m_queueMap[instrument].pop();
     if (orderOpt.has_value()) {
       Order order = orderOpt.value();
       std::cout << "Processing order " << order.getClientOrderId() << '\n';
 
       std::vector<ExecutionRecord> executionRecordsList =
-          m_orderBookMap[instrument]->processOrder(order);
+          m_orderBookMap[instrument].processOrder(order);
 
       for (auto executionRecord : executionRecordsList) {
-        m_executionRecordQueuePtr->push(executionRecord);
+        m_executionRecordQueue.push(executionRecord);
       }
     } else
       return;
@@ -91,7 +88,7 @@ void Exchange::processOrders(std::string instrument) {
 void Exchange::writeExecutionRecords(std::ofstream &file) {
   while (true) {
     std::optional<ExecutionRecord> executionRecordOpt =
-        m_executionRecordQueuePtr->pop();
+        m_executionRecordQueue.pop();
 
     if (executionRecordOpt.has_value()) {
       ExecutionRecord executionRecord = executionRecordOpt.value();
@@ -136,7 +133,7 @@ bool Exchange::validateOrder(std::vector<std::string> order) {
         {"side", ""},
         {"quantity", ""},
         {"price", ""}};
-    m_executionRecordQueuePtr->push(
+    m_executionRecordQueue.push(
         ExecutionRecord(Order::getNextOrderId(), orderMap,
                         "Missing one or more required fields."));
     return false;
@@ -151,7 +148,7 @@ bool Exchange::validateOrder(std::vector<std::string> order) {
 
   if (order[0].empty()) {
     std::cout << "Invalid order: client order id is empty\n";
-    m_executionRecordQueuePtr->push(ExecutionRecord(
+    m_executionRecordQueue.push(ExecutionRecord(
         Order::getNextOrderId(), orderMap, "Invalid client order id"));
     return false;
   }
@@ -159,7 +156,7 @@ bool Exchange::validateOrder(std::vector<std::string> order) {
   if (!isInstrumentValid(order[1])) {
     std::cout << "Invalid order: client order id: '" << order[0]
               << "' invalid instrument: " << order[1] << '\n';
-    m_executionRecordQueuePtr->push(ExecutionRecord(
+    m_executionRecordQueue.push(ExecutionRecord(
         Order::getNextOrderId(), orderMap, "Invalid instrument"));
     return false;
   }
@@ -167,7 +164,7 @@ bool Exchange::validateOrder(std::vector<std::string> order) {
   if (order[2] != "1" && order[2] != "2") {
     std::cout << "Invalid order: order id: '" << order[0]
               << "' invalid side: " << order[2] << '\n';
-    m_executionRecordQueuePtr->push(
+    m_executionRecordQueue.push(
         ExecutionRecord(Order::getNextOrderId(), orderMap, "Invalid side"));
     return false;
   }
@@ -177,20 +174,20 @@ bool Exchange::validateOrder(std::vector<std::string> order) {
     if (quantity < 10 || quantity > 1000 || quantity % 10 != 0) {
       std::cout << "Invalid order: order id: '" << order[0]
                 << "' invalid quantity: " << order[3] << '\n';
-      m_executionRecordQueuePtr->push(ExecutionRecord(
+      m_executionRecordQueue.push(ExecutionRecord(
           Order::getNextOrderId(), orderMap, "Invalid quantity"));
       return false;
     }
   } catch (std::invalid_argument &e) {
     std::cout << "Invalid order: order id: '" << order[0]
               << "' invalid quantity: " << order[3] << '\n';
-    m_executionRecordQueuePtr->push(
+    m_executionRecordQueue.push(
         ExecutionRecord(Order::getNextOrderId(), orderMap, "Invalid quantity"));
     return false;
   } catch (std::out_of_range &e) {
     std::cout << "Invalid order: order id: '" << order[0]
               << "' invalid quantity: " << order[3] << '\n';
-    m_executionRecordQueuePtr->push(
+    m_executionRecordQueue.push(
         ExecutionRecord(Order::getNextOrderId(), orderMap, "Invalid quantity"));
     return false;
   }
@@ -200,20 +197,20 @@ bool Exchange::validateOrder(std::vector<std::string> order) {
     if (price <= 0) {
       std::cout << "Invalid order: order id: '" << order[0]
                 << "' invalid price: " << order[4] << '\n';
-      m_executionRecordQueuePtr->push(
+      m_executionRecordQueue.push(
           ExecutionRecord(Order::getNextOrderId(), orderMap, "Invalid price"));
       return false;
     }
   } catch (std::invalid_argument &e) {
     std::cout << "Invalid order: order id: '" << order[0]
               << "' invalid price: " << order[4] << '\n';
-    m_executionRecordQueuePtr->push(
+    m_executionRecordQueue.push(
         ExecutionRecord(Order::getNextOrderId(), orderMap, "Invalid price"));
     return false;
   } catch (std::out_of_range &e) {
     std::cout << "Invalid order: order id: '" << order[0]
               << "' invalid price: " << order[4] << '\n';
-    m_executionRecordQueuePtr->push(
+    m_executionRecordQueue.push(
         ExecutionRecord(Order::getNextOrderId(), orderMap, "Invalid price"));
     return false;
   }
